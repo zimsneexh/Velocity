@@ -46,19 +46,29 @@ Velocity works with groups. There are some special groups with specific privileg
 
 ### Available endpoints
 
-- [POST `/u/login`](#post-u-login): Authenticate as a user
+Authentication:
 
-- [POST `/u/logout`](#post-u-logout): Log out the current user
+- [`/u/auth` - POST](#post-u-auth): Authenticate as a user
 
-- [POST `/u/reauth`](#post-u-reauth): Reauthenticate
+- [`/u/auth` - DELETE](#delete-u-auth): Log out the current user
 
-- [PUT `/u/user`](#put-u-user): Create a new user
+- [`/u/auth` - PATCH](#patch-u-auth): Reauthenticate
 
-- [PUT `/u/group`](#put-u-group): Create a new group
+User and group management:
 
-- [PUT `/u/group/assign`](#put-u-group-assign): Assign a user to a group
+- [`/u/user` - PUT](#put-u-user): Create a new user
 
-## POST `/u/login` <a name="post-u-login"></a>
+- [`/u/user` - DELETE](#delete-u-user): Remove a user
+
+- [`/u/group` - PUT](#put-u-group): Create a new group
+
+- [`/u/group` - DELETE](#delete-u-group): Remove a group
+
+- [`/u/group/assign` - PUT](#put-u-group-assign): Assign a user to a group
+
+- [`/u/group/assign` - DELETE](#delete-u-group-assign): Remove group membership
+
+## `/u/auth` - POST <a name="post-u-auth"></a>
 
 Velocity's authentication model works using so-called 'authkeys'. Every user that is currently authenticated gets such a key that has a certain validity window. Every privileged action that requires authentication requires this authkey to be sent with the request. To obtain such an authkey, a user can issue an authentication to this endpoint.
 
@@ -89,7 +99,7 @@ The password and username get transmitted in plaintext. It is assumed that the c
 
 Every authkey has an expiration date that is transmitted in the unix timestamp format. The key has to be renewed before this date is passed for the key to stay valid.
 
-## POST `/u/logout` <a name="post-u-logout"></a>
+## `/u/auth` - DELETE <a name="delete-u-auth"></a>
 
 If a user desires to drop the current `authkey` immediately, this endpoint can be used for that.
 
@@ -109,7 +119,7 @@ If a user desires to drop the current `authkey` immediately, this endpoint can b
 > 
 > For security reasons, dropping a non-existing authkey does still result in a `200` response code.
 
-## POST `/u/reauth` <a name="post-u-reauth"></a>
+## `/u/auth` - PATCH <a name="patch-u-auth"></a>
 
 If an authkey lease is about to expire, this call can be used to create a new authkey using the expiring key.
 
@@ -139,7 +149,7 @@ If an authkey lease is about to expire, this call can be used to create a new au
 }
 ```
 
-## PUT `/u/user` <a name="put-u-user"></a>
+## `/u/user` - PUT <a name="put-u-user"></a>
 
 > **Note**
 > 
@@ -177,7 +187,30 @@ The groups field can be an empty array.
 }
 ```
 
-## PUT `/u/group` <a id="put-u-group"></a>
+## `/u/user` - DELETE <a name="delete-u-user"></a>
+
+> **Note**
+> 
+> Only users that are in the `usermanager` group can remove users
+
+This call removes the user with the supplied `UID`. This also removes the user's group that is named the same as the user and all of its VMs and images.
+
+**Request:**
+
+```json
+{
+    "authkey": "<authkey>",
+    "uid": "<UID>"
+}
+```
+
+**Response:**
+
+- `200`: User removed
+
+- `401 - Unauthorized`: The current user is not allowed to remove users
+
+## `/u/group` - PUT <a id="put-u-group"></a>
 
 > **Note**
 > 
@@ -208,7 +241,30 @@ The groups field can be an empty array.
 }
 ```
 
-## PUT `/u/group/assign` <a id="put-u-group-assign"></a>
+## `/u/group` - DELETE <a name="delete-u-group"></a>
+
+> **Note**
+> 
+> Only users that are in the `usermanager` group can remove groups
+
+This call removes all the VMs and images owned by this group.
+
+**Request:**
+
+```json
+{
+    "authkey": "<authkey>",
+    "uid": "<UID>"
+}
+```
+
+**Response:**
+
+- `200`: Group removed
+
+- `401 - Unauthorized`: The current user is not allowed to remove users
+
+## `/u/group/assign` - PUT <a id="put-u-group-assign"></a>
 
 Assign a user to groups:
 
@@ -228,11 +284,47 @@ Assign a user to groups:
 
 **Response:**
 
-- `200`: Group created
+- `200`: Groups added
 
 - `401 - Unauthorized`: The current user is not allowed to create new groups
 
 - `403 - Forbidden`: A user in `usermanager` tried to assign to `administrator` group
+
+```json
+200
+{
+    "uid": "<UID>",
+    "groups": ["<GID>"]
+}
+```
+
+The response lets the caller know which groups the user now belongs to.
+
+## `/u/group/assign` - DELETE <a name="delete-u-group-assign"></a>
+
+Remove a user from groups:
+
+> **Note**
+> 
+> Only users that are in the `usermanager` group can remove users from groups
+
+**Request:**
+
+```json
+{
+    "authkey": "<authkey>",
+    "uid": "<UID>",
+    "groups": ["<GID>"]
+}
+```
+
+**Response:**
+
+- `200`: User removed from groups
+
+- `401 - Unauthorized`: The current user is not allowed to remove from groups
+
+- `403 - Forbidden`: A user in `usermanager` tried to remove from `administrator` group
 
 ```json
 200

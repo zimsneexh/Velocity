@@ -80,7 +80,7 @@ The password and username get transmitted in plaintext. It is assumed that the c
 - `403 - Forbidden`: Authentication failed - username or password do not match
 
 ```json
-200:
+200
 {
     "authkey": "<authkey>",
     "expires": "<unix timestamp>"
@@ -132,7 +132,7 @@ If an authkey lease is about to expire, this call can be used to create a new au
 - `403`: Tried to renew a non-existing / expired authkey
 
 ```json
-200:
+200
 {
     "authkey": "<new authkey>",
     "expires": "<unix timestamp>"
@@ -169,7 +169,7 @@ The groups field can be an empty array.
 - `409 - Conflict`: A user with the supplied `username` does already exist
 
 ```json
-200:
+200
 {
     "uid": "<UID>",
     "username": "<username>",
@@ -201,7 +201,7 @@ The groups field can be an empty array.
 - `409 - Conflict`: A group with the supplied `groupname` does already exist
 
 ```json
-200:
+200
 {
     "gid": "<GID>",
     "groupname": "<groupname>"
@@ -233,3 +233,13 @@ Assign a user to groups:
 - `401 - Unauthorized`: The current user is not allowed to create new groups
 
 - `403 - Forbidden`: A user in `usermanager` tried to assign to `administrator` group
+
+```json
+200
+{
+    "uid": "<UID>",
+    "groups": ["<GID>"]
+}
+```
+
+The response lets the caller know which groups the user now belongs to.

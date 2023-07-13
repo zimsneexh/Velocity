@@ -301,7 +301,7 @@ Assign a user to groups:
 ```json
 {
     "uid": "<UID>",
-    "groups": ["<GID>"]
+    "groups": ["<GID>"]
 }
 ```
 
@@ -491,7 +491,7 @@ List all shares of the catalog
             "remove": true,
             "state": true,
             "interact": true
-        }, ...
+        }
     ]
 }
 ```
@@ -663,8 +663,6 @@ Create a new `EFI` virtual machine using the supplied data
 
 - `pool`: The poolid this VM belongs to
 
-
-
 - `cpu_count`: The amount of virtual CPUs that should be available to the guest
 
 - `memory_size_mb`: The amount of memory assigned to the guest in `miB`
@@ -680,8 +678,6 @@ Create a new `EFI` virtual machine using the supplied data
 - `storage_devices`: An array of attached storage devices
 
 - `nics`: An array of attached network devices
-
-
 
 - `rosetta`: Whether to enable the rosetta `x86` translation layer if available on the host
 
@@ -814,7 +810,7 @@ If the `force` flag is set to `true` state changes will be forceful (eg. shutdow
 
 ```json
 {
-    "code": "...",
+    "code": "...",
     "message": "...",
     "vmid": "<VMID>",
     "req_state": "<VM state>",
